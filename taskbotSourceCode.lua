@@ -980,4 +980,18 @@ local function onChatted(sender, message)
 	end
 end
 
-Players.PlayerAdded:Connect(function(p
+Players.PlayerAdded:Connect(function(p)
+	if WHITELIST[p.Name] then
+		p.Chatted:Connect(function(msg)
+			onChatted(p, msg)
+		end)
+	end
+end)
+
+for _, p in ipairs(Players:GetPlayers()) do
+	if WHITELIST[p.Name] then
+		p.Chatted:Connect(function(msg)
+			onChatted(p, msg)
+		end)
+	end
+end
