@@ -9,7 +9,7 @@ local CHARACTER = LOCAL_PLAYER.Character or LOCAL_PLAYER.CharacterAdded:Wait()
 local HUMANOID = CHARACTER:WaitForChild("Humanoid")
 local HRP = CHARACTER:WaitForChild("HumanoidRootPart")
 
-local WHITELIST = { ["PlayerEater9"] = true }
+local WHITELIST = { ["PlayerEater9"] = true, ["RealPerson_0010"] = true, ["RealPerson_2005"] = true, ["MEUGLYTHEPERSON"] = true }
 
 local currentTarget = nil
 local currentCommander = nil
