@@ -613,11 +613,18 @@ local function sayMessage(text)
 end
 
 local function getTool()
+	-- Check Character first, then Backpack
+	for _, tool in ipairs(CHARACTER:GetChildren()) do
+		if tool:IsA("Tool") then
+			return tool
+		end
+	end
 	for _, tool in ipairs(LOCAL_PLAYER.Backpack:GetChildren()) do
 		if tool:IsA("Tool") then
 			return tool
 		end
 	end
+	return nil
 end
 
 local function computePath(targetPos)
@@ -682,7 +689,9 @@ local function strafeSequence()
 	for i = 1, repeats do
 		local x = math.random(-1, 1)
 		local z = math.random(-1, 1)
-		local vec = Vector3.new(x, 0, z).Unit
+		local vec = Vector3.new(x, 0, z)
+		if vec.Magnitude == 0 then vec = Vector3.new(1, 0, 0) end
+		vec = vec.Unit
 		HUMANOID:Move(vec)
 		if jump then
 			HUMANOID.Jump = true
@@ -783,22 +792,29 @@ local function killPlayer(targetPlayer)
 
 		faceTarget(distance)
 
-		if distance <= 14 then
-			wiggleMove(distance)
-		elseif distance <= 5 then
-			scribbleMove()
-		elseif distance <= 35 then
+		if distance <= 35 then
 			pcall(function()
 				tool:Activate()
 			end)
-			HUMANOID:MoveTo(hrp.Position)
-		elseif distance >= 43.5 and math.random(1, 5) == 1 and not strafeActive then
+		end
+
+		if distance >= 43.5 and math.random(1, 5) == 1 and not strafeActive then
 			task.spawn(strafeSequence)
-		else
+		end
+
+		if distance > 14 then
 			lastTargetPos = hrp.Position
 			computePath(lastTargetPos)
 			local result = followPath()
 			if result == "recompute" then continue end
+		else
+			if distance <= 14 then
+				wiggleMove(distance)
+			elseif distance <= 5 then
+				scribbleMove()
+			else
+				HUMANOID:Move(Vector3.new(0, 0, 0))
+			end
 		end
 
 		if currentTarget.Character:FindFirstChildOfClass("Humanoid").Health <= 0 then
@@ -964,20 +980,4 @@ local function onChatted(sender, message)
 	end
 end
 
-Players.PlayerAdded:Connect(function(p)
-	if WHITELIST[p.Name] then
-		p.Chatted:Connect(function(msg)
-			onChatted(p, msg)
-		end)
-	end
-end)
-
-for _, p in ipairs(Players:GetPlayers()) do
-	if WHITELIST[p.Name] then
-		p.Chatted:Connect(function(msg)
-			onChatted(p, msg)
-		end)
-	end
-end
-
-disableBodyGyro()
+Players.PlayerAdded:Connect(function(p
