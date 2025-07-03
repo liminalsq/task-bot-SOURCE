@@ -1942,6 +1942,9 @@ local function stareAt(player)
 
 	staring = true
 	enableBodyGyro()
+	if bodyGyro.Parent ~= HRP then
+		bodyGyro.Parent = HRP
+	end
 
 	while staring and player.Character and player.Character:FindFirstChild("HumanoidRootPart") do
 		local dir = (hrp.Position - HRP.Position).Unit
