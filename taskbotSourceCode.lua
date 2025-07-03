@@ -1924,7 +1924,7 @@ local function onCopyChatted(player, msg)
 	end
 end
 
-local function wandering()
+local function wander()
 	wandering = true
 	while wandering do
 		local x = math.random(-100, 100)
@@ -2052,7 +2052,7 @@ local function onChatted(sender, message)
 		nonsenseMode = false
 		staring = false
 		wandering = true
-		task.spawn(wandering)
+		task.spawn(wander)
 	elseif message:sub(1, 7) == "stareat" then
 		local targets = parseTargetsList(message:sub(8))
 		if #targets > 0 then
