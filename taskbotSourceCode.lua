@@ -1725,7 +1725,7 @@ local function getPlayerByPartialName(name)
 	name = name:lower()
 	for _, player in ipairs(Players:GetPlayers()) do
 		if player ~= LOCAL_PLAYER and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-			if player.Name:lower():find(name) then
+			if player.Name:lower():match(name) then
 				return player
 			end
 		end
@@ -1795,14 +1795,14 @@ local function killPlayer(targetPlayer)
 	local startTime = tick()
 
 	while chasing and currentTarget and currentTarget.Character and currentTarget.Character:FindFirstChild("HumanoidRootPart") do
+		if HUMANOID.Sit then
+			HUMANOID.Jump = true
+		end
+		
 		local hrp = currentTarget.Character.HumanoidRootPart
 		local distance = (HRP.Position - hrp.Position).Magnitude
 
 		faceTarget(distance)
-		
-		if HUMANOID.Sit then
-			HUMANOID.Jump = true
-		end
 
 		if distance <= 35 then
 			pcall(function()
@@ -1864,13 +1864,13 @@ local function followPlayer(targetPlayer)
 	following = true
 
 	while following and currentTarget and currentTarget.Character and currentTarget.Character:FindFirstChild("HumanoidRootPart") do
-		local hrp = currentTarget.Character.HumanoidRootPart
-		local distance = (HRP.Position - hrp.Position).Magnitude
-		
 		if HUMANOID.Sit then
 			HUMANOID.Jump = true
 		end
-
+	
+		local hrp = currentTarget.Character.HumanoidRootPart
+		local distance = (HRP.Position - hrp.Position).Magnitude
+		
 		if distance > 5 then
 			lastTargetPos = hrp.Position
 			computePath(lastTargetPos)
@@ -1936,20 +1936,22 @@ local function wander()
 end
 
 local function stareAt(player)
-	if not player or not player.Character then return end
-	local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-	if not hrp then return end
+	if not player then return end
 
 	staring = true
-	enableBodyGyro()
+
 	if bodyGyro.Parent ~= HRP then
 		bodyGyro.Parent = HRP
 	end
 
 	while staring and player.Character and player.Character:FindFirstChild("HumanoidRootPart") do
+		local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+		if not hrp then break end
+
 		local dir = (hrp.Position - HRP.Position).Unit
-		local yawOnly = CFrame.new(Vector3.new(), Vector3.new(dir.X, 0, dir.Z))
+		local yawOnly = CFrame.new(Vector3.zero, Vector3.new(dir.X, 0, dir.Z))
 		bodyGyro.CFrame = yawOnly
+
 		RunService.Heartbeat:Wait()
 	end
 
@@ -1960,7 +1962,7 @@ local copyingConnection = nil
 
 local function onChatted(sender, message)
 	if not WHITELIST[sender.Name] then return end
-	if not message:lower():sub(1, 4) == "ai: " then return end
+	if message:lower():sub(1, 4) ~= "ai: " then return end
 
 	currentCommander = sender
 	message = message:sub(5):lower()
@@ -2070,9 +2072,16 @@ local function onChatted(sender, message)
 			local target = targets[1]
 
 			task.spawn(function()
+				sayMessage("Staring at: " .. target.Name)
 				stareAt(target)
 			end)
+		else
+			sayMessage("Could not find target.")
 		end
+	elseif message == "jump" or message == "unstuck" or message == "unsit" or message == "hop" then
+		HUMANOID.Jump = true
+	elseif message == "reset" or message == "die" or message == "respawn" then
+		HUMANOID.Health = 0
 	end
 end
 
